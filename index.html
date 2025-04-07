@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generador de Trama para Token NFC</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    input[type="color"] {
+      -webkit-appearance: none;
+      border: none;
+      width: 32px;
+      height: 32px;
+      cursor: pointer;
+    }
+    input[type="color"]::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+    input[type="color"]::-webkit-color-swatch {
+      border: none;
+      border-radius: 4px;
+    }
+    .hex-input {
+      width: 60px;
+    }
+    .partner-input .hex-input {
+      width: 50px;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+  <div class="container mx-auto px-4 py-8 max-w-4xl">
+    <div class="bg-white rounded-lg shadow-lg p-6">
+      <div class="flex items-center mb-6">
+        <i class="fas fa-microchip text-blue-600 text-3xl mr-3"></i>
+        <h1 class="text-2xl font-bold text-gray-800">Generador de Trama para Token NFC</h1>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        <!-- Main Parameters -->
+        <div class="bg-gray-50 p-4 rounded-lg">
+          <h2 class="text-lg font-semibold mb-4 text-gray-700 border-b pb-2">Parámetros Principales</h2>
+          
+          <div class="grid grid-cols-2 gap-4">
+            <div class="mb-3">
+              <label for="cmd" class="block text-sm font-medium text-gray-700 mb-1">CMD:</label>
+              <input type="text" id="cmd" value="00" class="hex-input px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" maxlength="2" onkeyup="validateHex(this)">
+            </div>
+            
+            <div class="mb-3">
+              <label for="cm2" class="block text-sm font-medium text-gray-700 mb-1">CM2:</label>
+              <input type="text" id="cm2" value="00" class="hex-input px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" maxlength="2" onkeyup="validateHex(this)">
+            </div>
+            
+            <div class="mb-3">
+              <label for="bank" class="block text-sm font-medium text-gray-700 mb-1">BANK:</label>
+              <input type="text" id="bank" value="0B" class="hex-input px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" maxlength="2" onkeyup="validateHex(this)">
+            </div>
+            
+            <div class="mb-3">
+              <label for="file" class="block text-sm font-medium text-gray-700 mb-1">FILE:</label>
+              <input type="text" id="file" value="07" class="hex-input px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" maxlength="2" onkeyup="validateHex(this)">
+            </div>
+          </div>
+
+          <!-- Color Section -->
+          <div class="mt-6">
+            <h3 class="text-md font-medium mb-3 text-gray-700">Color RGB</h3>
+            <div class="flex items-center space-x-4">
+              <div class="flex items-center">
+                <input type="color" id="colorPicker" value="#FFFFFF" class="mr-2" onchange="updateRGBFromPicker()">
+                <div id="colorPreview" class="w-8 h-8 border border-gray-300 rounded"></div>
+              </div>
+              
+              <div class="grid grid-cols-3 gap-2">
+                <div>
+                  <label for="r" class="block text-sm font-medium text-gray-700 mb-1">R:</label>
+                  <input type="text" id="r" value="FF" class="hex-input px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" maxlength="2" onkeyup="validateHex(this); updateColorPicker()">
+                </div>
+                
+                <div>
+                  <label for="g" class="block text-sm font-medium text-gray-700 mb-1">G:</label>
+                  <input type="text" id="g" value="FF" class="hex-input px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" maxlength="2" onkeyup="validateHex(this); updateColorPicker()">
+                </div>
+                
+                <div>
+                  <label for="b" class="block text-sm font-medium text-gray-700 mb-1">B:</label>
+                  <input type="text" id="b" value="FF" class="hex-input px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" maxlength="2" onkeyup="validateHex(this); updateColorPicker()">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Family Name -->
+          <div class="mt-6">
+            <label for="familia" class="block text-sm font-medium text-gray-700 mb-1">Nombre familia:</label>
+            <input type="text" id="familia" maxlength="24" value="ANIMALES GRANJA" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <p class="text-xs text-gray-500 mt-1">Máximo 24 caracteres. Caracteres restantes: <span id="charCount">10</span></p>
+          </div>
+        </div>
+
+        <!-- Partners Section -->
+        <div class="bg-gray-50 p-4 rounded-lg">
+          <h2 class="text-lg font-semibold mb-4 text-gray-700 border-b pb-2">Partners (bank y file)</h2>
+          
+          <div class="grid grid-cols-2 gap-4" id="partners">
+            <!-- Partners will be generated here by JavaScript -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Generate Button -->
+      <div class="mt-6 flex justify-center">
+        <button onclick="generarTrama()" class="px-6 py-3 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
+          <i class="fas fa-cogs mr-2"></i>Generar Trama
+        </button>
+      </div>
+
+      <!-- Output Section -->
+      <div class="mt-6">
+        <div class="flex justify-between items-center mb-2">
+          <h3 class="text-lg font-semibold text-gray-700">Resultado:</h3>
+          <button id="copyButton" onclick="copyToClipboard()" class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 transition-colors">
+            <i class="far fa-copy mr-1"></i>Copiar
+          </button>
+        </div>
+        <div class="bg-gray-800 text-green-400 p-4 rounded-md font-mono text-sm overflow-x-auto" id="salida">
+          La trama aparecerá aquí...
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Generate partner inputs
+    const partnerContainer = document.getElementById("partners");
+    for (let i = 0; i < 8; i++) {
+      partnerContainer.innerHTML += `
+        <div class="partner-input mb-3">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Partner ${i}:</label>
+          <div class="flex space-x-2">
+            <div>
+              <span class="text-xs text-gray-500">Bank</span>
+              <input type="text" id="b${i}" value="00" class="hex-input px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" maxlength="2" onkeyup="validateHex(this)">
+            </div>
+            <div>
+              <span class="text-xs text-gray-500">File</span>
+              <input type="text" id="f${i}" value="00" class="hex-input px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" maxlength="2" onkeyup="validateHex(this)">
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Update character count for family name
+    document.getElementById('familia').addEventListener('input', function() {
+      const remaining = 24 - this.value.length;
+      document.getElementById('charCount').textContent = remaining;
+    });
+    
+    // Trigger initial character count
+    document.getElementById('familia').dispatchEvent(new Event('input'));
+
+    // Validate hex input
+    function validateHex(input) {
+      input.value = input.value.replace(/[^0-9A-Fa-f]/g, '').toUpperCase();
+    }
+
+    // Update color picker from RGB inputs
+    function updateColorPicker() {
+      const r = document.getElementById('r').value.padStart(2, '0');
+      const g = document.getElementById('g').value.padStart(2, '0');
+      const b = document.getElementById('b').value.padStart(2, '0');
+      
+      if (r.length === 2 && g.length === 2 && b.length === 2) {
+        const hexColor = `#${r}${g}${b}`;
+        document.getElementById('colorPicker').value = hexColor;
+        document.getElementById('colorPreview').style.backgroundColor = hexColor;
+      }
+    }
+
+    // Update RGB inputs from color picker
+    function updateRGBFromPicker() {
+      const hexColor = document.getElementById('colorPicker').value;
+      const r = hexColor.substring(1, 3);
+      const g = hexColor.substring(3, 5);
+      const b = hexColor.substring(5, 7);
+      
+      document.getElementById('r').value = r.toUpperCase();
+      document.getElementById('g').value = g.toUpperCase();
+      document.getElementById('b').value = b.toUpperCase();
+      
+      document.getElementById('colorPreview').style.backgroundColor = hexColor;
+    }
+
+    // Initialize color preview
+    updateColorPicker();
+
+    // Copy to clipboard function
+    function copyToClipboard() {
+      const text = document.getElementById('salida').innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        const copyButton = document.getElementById('copyButton');
+        copyButton.innerHTML = '<i class="fas fa-check mr-1"></i>Copiado';
+        copyButton.classList.remove('bg-gray-200', 'text-gray-700');
+        copyButton.classList.add('bg-green-500', 'text-white');
+        
+        setTimeout(() => {
+          copyButton.innerHTML = '<i class="far fa-copy mr-1"></i>Copiar';
+          copyButton.classList.remove('bg-green-500', 'text-white');
+          copyButton.classList.add('bg-gray-200', 'text-gray-700');
+        }, 2000);
+      });
+    }
+
+    function padHex(value, length = 2) {
+      return value.toString().padStart(length, '0').toUpperCase();
+    }
+
+    function textToHex(text, maxLen) {
+      let hex = "";
+      for (let i = 0; i < maxLen; i++) {
+        if (i < text.length) {
+          hex += padHex(text.charCodeAt(i).toString(16));
+        } else {
+          hex += "00";
+        }
+      }
+      return hex;
+    }
+
+    function generarTrama() {
+      let trama = "#";
+      const campos = ["cmd", "cm2", "bank", "file", "r", "g", "b"];
+      campos.forEach(id => {
+        let valor = document.getElementById(id).value.trim();
+        trama += padHex(valor);
+      });
+
+      for (let i = 0; i < 8; i++) {
+        let b = document.getElementById("b" + i).value.trim();
+        let f = document.getElementById("f" + i).value.trim();
+        trama += padHex(b) + padHex(f);
+      }
+
+      let nombreFamilia = document.getElementById("familia").value.trim().toUpperCase();
+      trama += textToHex(nombreFamilia, 24);
+      trama += "#";
+
+      document.getElementById("salida").innerText = trama;
+    }
+  </script>
+</body>
+</html>
