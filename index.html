@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Generador de Trama para Token NFC</title>
+  <title>Generador y Decodificador de Trama para Token NFC</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
@@ -34,7 +34,7 @@
     <div class="bg-white rounded-lg shadow-lg p-6">
       <div class="flex items-center mb-6">
         <i class="fas fa-microchip text-blue-600 text-3xl mr-3"></i>
-        <h1 class="text-2xl font-bold text-gray-800">Generador de Trama para Token NFC</h1>
+        <h1 class="text-2xl font-bold text-gray-800">Generador y Decodificador de Trama para Token NFC</h1>
       </div>
 
       <div class="grid md:grid-cols-2 gap-6">
@@ -110,10 +110,19 @@
         </div>
       </div>
 
-      <!-- Generate Button -->
-      <div class="mt-6 flex justify-center">
+      <!-- Trama Input Section -->
+      <div class="mt-6 bg-gray-50 p-4 rounded-lg">
+        <label for="tramaInput" class="block text-sm font-medium text-gray-700 mb-2">Trama completa:</label>
+        <textarea id="tramaInput" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm">#00000B07FFFFFF0B02000000000000000000000000414E494D414C4553204752414E4A41000000000000000000000000#</textarea>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="mt-6 flex flex-wrap justify-center gap-4">
         <button onclick="generarTrama()" class="px-6 py-3 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
           <i class="fas fa-cogs mr-2"></i>Generar Trama
+        </button>
+        <button onclick="decodificarTrama()" class="px-6 py-3 bg-green-600 text-white font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors">
+          <i class="fas fa-search mr-2"></i>Decodificar Trama
         </button>
       </div>
 
@@ -230,6 +239,15 @@
       return hex;
     }
 
+    function hexToText(hex) {
+      let texto = "";
+      for (let i = 0; i < hex.length; i += 2) {
+        let byte = parseInt(hex.substr(i, 2), 16);
+        if (byte > 0) texto += String.fromCharCode(byte);
+      }
+      return texto;
+    }
+
     function generarTrama() {
       let trama = "#";
       const campos = ["cmd", "cm2", "bank", "file", "r", "g", "b"];
@@ -249,6 +267,96 @@
       trama += "#";
 
       document.getElementById("salida").innerText = trama;
+      document.getElementById("tramaInput").value = trama;
+      
+      // Debug info
+      console.log("Trama generada:", trama);
+      console.log("Longitud total:", trama.length);
+      console.log("Longitud sin #:", trama.slice(1, -1).length);
+    }
+
+    function decodificarTrama() {
+      let input = document.getElementById("tramaInput").value.trim();
+      
+      // Remove any whitespace or line breaks that might be in the textarea
+      input = input.replace(/\s+/g, '');
+      
+      // Debug information before removing # symbols
+      console.log("Trama original:", input);
+      console.log("Longitud con #:", input.length);
+      
+      // Store original input for validation
+      const originalInput = input;
+      
+      // Remove the # symbols if present
+      if (input.startsWith("#")) input = input.substring(1);
+      if (input.endsWith("#")) input = input.slice(0, -1);
+      
+      // Debug information after removing # symbols
+      console.log("Trama sin #:", input);
+      console.log("Longitud sin #:", input.length);
+      
+      // Check if the original input has the correct format (starts and ends with #)
+      if (!originalInput.startsWith("#") || !originalInput.endsWith("#")) {
+        showAlert("La trama debe comenzar y terminar con el símbolo #");
+        return;
+      }
+      
+      // Check if the trama has the correct length (94 characters = 47 bytes)
+      if (input.length !== 94) {
+        showAlert(`La trama debe tener exactamente 94 caracteres sin los símbolos #. Longitud actual: ${input.length}`);
+        return;
+      }
+
+      try {
+        document.getElementById("cmd").value = input.slice(0, 2);
+        document.getElementById("cm2").value = input.slice(2, 4);
+        document.getElementById("bank").value = input.slice(4, 6);
+        document.getElementById("file").value = input.slice(6, 8);
+        document.getElementById("r").value = input.slice(8, 10);
+        document.getElementById("g").value = input.slice(10, 12);
+        document.getElementById("b").value = input.slice(12, 14);
+
+        // Update color picker after setting RGB values
+        updateColorPicker();
+
+        for (let i = 0; i < 8; i++) {
+          document.getElementById("b" + i).value = input.slice(14 + i * 4, 16 + i * 4);
+          document.getElementById("f" + i).value = input.slice(16 + i * 4, 18 + i * 4);
+        }
+
+        let hexNombre = input.slice(46, 94);
+        document.getElementById("familia").value = hexToText(hexNombre);
+        
+        // Update character count after setting family name
+        document.getElementById('familia').dispatchEvent(new Event('input'));
+
+        document.getElementById("salida").innerHTML = `
+          <span class="text-yellow-400">✓</span> Trama decodificada correctamente.
+          <div class="mt-2 text-xs text-gray-400">Todos los campos han sido actualizados con los valores de la trama.</div>
+        `;
+      } catch (error) {
+        showAlert(`Error al decodificar la trama: ${error.message}`);
+        console.error("Error decodificando trama:", error);
+      }
+    }
+
+    // Show alert function (better than native alert)
+    function showAlert(message) {
+      // Create alert element
+      const alertEl = document.createElement('div');
+      alertEl.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-md shadow-lg z-50 flex items-center';
+      alertEl.innerHTML = `
+        <i class="fas fa-exclamation-triangle mr-2"></i>
+        <span>${message}</span>
+      `;
+      document.body.appendChild(alertEl);
+      
+      // Remove after 5 seconds
+      setTimeout(() => {
+        alertEl.classList.add('opacity-0', 'transition-opacity', 'duration-500');
+        setTimeout(() => alertEl.remove(), 500);
+      }, 5000);
     }
   </script>
 </body>
