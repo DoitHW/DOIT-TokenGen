@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Generador de Trama para Token NFC</title>
+  <title>Generador y Decodificador de Trama para Token NFC</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
@@ -21,308 +21,376 @@
       border: none;
       border-radius: 4px;
     }
+    /* Se amplía el ancho para los campos principales */
     .hex-input {
-      width: 60px;
+      width: 80px;
     }
     .partner-input .hex-input {
       width: 50px;
     }
-    .legend-item[open] summary {
-      background-color: #f0f9ff;
-    }
   </style>
 </head>
 <body class="bg-gray-100 min-h-screen">
-  <div class="container mx-auto px-4 py-8 max-w-6xl">
-    <div class="flex flex-col lg:flex-row gap-6">
-      <!-- Main Content -->
-      <div class="lg:w-2/3">
-        <div class="bg-white rounded-lg shadow-lg p-6">
-          <div class="flex items-center mb-6">
-            <i class="fas fa-microchip text-blue-600 text-3xl mr-3"></i>
-            <h1 class="text-2xl font-bold text-gray-800">Generador de Trama para Token NFC</h1>
-          </div>
+  <!-- Contenedor principal con sidebar para la leyenda -->
+  <div class="flex">
+    <!-- Área principal -->
+    <div class="w-3/4 px-4 py-8">
+      <div class="bg-white rounded-lg shadow-lg p-6">
+        <div class="flex items-center mb-6">
+          <i class="fas fa-microchip text-blue-600 text-3xl mr-3"></i>
+          <h1 class="text-2xl font-bold text-gray-800">Generador y Decodificador de Trama para Token NFC</h1>
+        </div>
 
-          <div class="grid md:grid-cols-2 gap-6">
-            <!-- Main Parameters -->
-            <div class="bg-gray-50 p-4 rounded-lg">
-              <h2 class="text-lg font-semibold mb-4 text-gray-700 border-b pb-2">Parámetros Principales</h2>
-              
-              <div class="grid grid-cols-2 gap-4">
-                <div class="mb-3">
-                  <label for="cmd" class="block text-sm font-medium text-gray-700 mb-1">CMD:</label>
-                  <input type="text" id="cmd" value="00" class="hex-input px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" maxlength="2" onkeyup="validateHex(this)">
-                </div>
-                
-                <div class="mb-3">
-                  <label for="cm2" class="block text-sm font-medium text-gray-700 mb-1">CM2:</label>
-                  <input type="text" id="cm2" value="00" class="hex-input px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" maxlength="2" onkeyup="validateHex(this)">
-                </div>
-                
-                <div class="mb-3">
-                  <label for="bank" class="block text-sm font-medium text-gray-700 mb-1">BANK:</label>
-                  <input type="text" id="bank" value="0B" class="hex-input px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" maxlength="2" onkeyup="validateHex(this)">
-                </div>
-                
-                <div class="mb-3">
-                  <label for="file" class="block text-sm font-medium text-gray-700 mb-1">FILE:</label>
-                  <input type="text" id="file" value="07" class="hex-input px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" maxlength="2" onkeyup="validateHex(this)">
-                </div>
+        <div class="grid md:grid-cols-2 gap-6">
+          <!-- Parámetros Principales -->
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <h2 class="text-lg font-semibold mb-4 text-gray-700 border-b pb-2">Parámetros Principales</h2>
+            
+            <div class="grid grid-cols-2 gap-4">
+              <div class="mb-3">
+                <label for="cmd" class="block text-sm font-medium text-gray-700 mb-1">CMD:</label>
+                <select id="cmd" class="hex-input px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="0">0 - Con efecto de sonido</option>
+                  <option value="1">1 - Sin efecto de sonido</option>
+                </select>
               </div>
+              
+              <div class="mb-3">
+                <label for="cm2" class="block text-sm font-medium text-gray-700 mb-1">CM2:</label>
+                <select id="cm2" class="hex-input px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="0">0 - Color temporal</option>
+                  <option value="1">1 - Color permanente</option>
+                </select>
+              </div>
+              
+              <div class="mb-3">
+                <label for="bank" class="block text-sm font-medium text-gray-700 mb-1">BANK:</label>
+                <input type="text" id="bank" value="0B" class="hex-input px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" maxlength="2" onkeyup="validateHex(this)">
+              </div>
+              
+              <div class="mb-3">
+                <label for="file" class="block text-sm font-medium text-gray-700 mb-1">FILE:</label>
+                <input type="text" id="file" value="07" class="hex-input px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" maxlength="2" onkeyup="validateHex(this)">
+              </div>
+            </div>
 
-              <!-- Color Section -->
-              <div class="mt-6">
-                <h3 class="text-md font-medium mb-3 text-gray-700">Color RGB</h3>
-                <div class="flex items-center space-x-4">
-                  <div class="flex items-center">
-                    <input type="color" id="colorPicker" value="#FFFFFF" class="mr-2" onchange="updateRGBFromPicker()">
-                    <div id="colorPreview" class="w-8 h-8 border border-gray-300 rounded"></div>
+            <!-- Color Section -->
+            <div class="mt-6">
+              <h3 class="text-md font-medium mb-3 text-gray-700">Color RGB</h3>
+              <div class="flex items-center space-x-4">
+                <div class="flex items-center">
+                  <input type="color" id="colorPicker" value="#FFFFFF" class="mr-2" onchange="updateRGBFromPicker()">
+                  <div id="colorPreview" class="w-8 h-8 border border-gray-300 rounded"></div>
+                </div>
+                
+                <div class="grid grid-cols-3 gap-2">
+                  <div>
+                    <label for="r" class="block text-sm font-medium text-gray-700 mb-1">R:</label>
+                    <input type="text" id="r" value="FF" class="hex-input px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" maxlength="2" onkeyup="validateHex(this); updateColorPicker()">
                   </div>
                   
-                  <div class="grid grid-cols-3 gap-2">
-                    <div>
-                      <label for="r" class="block text-sm font-medium text-gray-700 mb-1">R:</label>
-                      <input type="text" id="r" value="FF" class="hex-input px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" maxlength="2" onkeyup="validateHex(this); updateColorPicker()">
-                    </div>
-                    
-                    <div>
-                      <label for="g" class="block text-sm font-medium text-gray-700 mb-1">G:</label>
-                      <input type="text" id="g" value="FF" class="hex-input px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" maxlength="2" onkeyup="validateHex(this); updateColorPicker()">
-                    </div>
-                    
-                    <div>
-                      <label for="b" class="block text-sm font-medium text-gray-700 mb-1">B:</label>
-                      <input type="text" id="b" value="FF" class="hex-input px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" maxlength="2" onkeyup="validateHex(this); updateColorPicker()">
-                    </div>
+                  <div>
+                    <label for="g" class="block text-sm font-medium text-gray-700 mb-1">G:</label>
+                    <input type="text" id="g" value="FF" class="hex-input px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" maxlength="2" onkeyup="validateHex(this); updateColorPicker()">
+                  </div>
+                  
+                  <div>
+                    <label for="b" class="block text-sm font-medium text-gray-700 mb-1">B:</label>
+                    <input type="text" id="b" value="FF" class="hex-input px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" maxlength="2" onkeyup="validateHex(this); updateColorPicker()">
                   </div>
                 </div>
               </div>
-
-              <!-- Family Name -->
-              <div class="mt-6">
-                <label for="familia" class="block text-sm font-medium text-gray-700 mb-1">Nombre familia:</label>
-                <input type="text" id="familia" maxlength="24" value="ANIMALES GRANJA" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <p class="text-xs text-gray-500 mt-1">Máximo 24 caracteres. Caracteres restantes: <span id="charCount">10</span></p>
-              </div>
             </div>
 
-            <!-- Partners Section -->
-            <div class="bg-gray-50 p-4 rounded-lg">
-              <h2 class="text-lg font-semibold mb-4 text-gray-700 border-b pb-2">Partners (bank y file)</h2>
-              
-              <div class="grid grid-cols-2 gap-4" id="partners">
-                <!-- Partners will be generated here by JavaScript -->
-              </div>
+            <!-- Familia y botón para añadir a la leyenda -->
+            <div class="mt-6">
+              <label for="familia" class="block text-sm font-medium text-gray-700 mb-1">Nombre familia:</label>
+              <input type="text" id="familia" maxlength="24" value="ANIMALES GRANJA" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <p class="text-xs text-gray-500 mt-1">Máximo 24 caracteres. Caracteres restantes: <span id="charCount">10</span></p>
+            </div>
+            <div class="mt-4">
+              <button type="button" onclick="agregarALeyenda()" class="px-3 py-1 bg-blue-600 text-white rounded text-sm">Añadir a leyenda</button>
             </div>
           </div>
 
-          <!-- Generate Button -->
-          <div class="mt-6 flex justify-center">
-            <button onclick="generarTrama()" class="px-6 py-3 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
-              <i class="fas fa-cogs mr-2"></i>Generar Trama
+          <!-- Partners Section -->
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <h2 class="text-lg font-semibold mb-4 text-gray-700 border-b pb-2">Partners (bank y file)</h2>
+            <div class="grid gap-4" id="partners">
+              <!-- Se generan 8 bloques de partners -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Trama Input Section -->
+        <div class="mt-6 bg-gray-50 p-4 rounded-lg">
+          <label for="tramaInput" class="block text-sm font-medium text-gray-700 mb-2">Trama completa:</label>
+          <textarea id="tramaInput" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm">#00000B07FFFFFF0B02000000000000000000000000414E494D414C4553204752414E4A41000000000000000000000000#</textarea>
+        </div>
+
+        <!-- Botones de acción (sin el botón clonar) -->
+        <div class="mt-6 flex flex-wrap justify-center gap-4">
+          <button onclick="generarTrama()" class="px-6 py-3 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
+            <i class="fas fa-cogs mr-2"></i>Generar Trama
+          </button>
+          <button onclick="decodificarTrama()" class="px-6 py-3 bg-green-600 text-white font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors">
+            <i class="fas fa-search mr-2"></i>Decodificar Trama
+          </button>
+          <button onclick="guardarFicha()" class="px-6 py-3 bg-indigo-600 text-white font-medium rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors">
+            <i class="fas fa-save mr-2"></i>Guardar Ficha
+          </button>
+        </div>
+
+        <!-- Simulador de Trama -->
+        <div class="mt-6 bg-gray-50 p-4 rounded-lg">
+          <h2 class="text-lg font-semibold mb-4 text-gray-700">Simulador de Trama</h2>
+          <div id="simuladorTrama" class="text-sm text-gray-700"></div>
+        </div>
+
+        <!-- Resultado -->
+        <div class="mt-6">
+          <div class="flex justify-between items-center mb-2">
+            <h3 class="text-lg font-semibold text-gray-700">Resultado:</h3>
+            <button id="copyButton" onclick="copyToClipboard()" class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 transition-colors">
+              <i class="far fa-copy mr-1"></i>Copiar
             </button>
           </div>
-
-          <!-- Output Section -->
-          <div class="mt-6">
-            <div class="flex justify-between items-center mb-2">
-              <h3 class="text-lg font-semibold text-gray-700">Resultado:</h3>
-              <button id="copyButton" onclick="copyToClipboard()" class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 transition-colors">
-                <i class="far fa-copy mr-1"></i>Copiar
-              </button>
-            </div>
-            <div class="bg-gray-800 text-green-400 p-4 rounded-md font-mono text-sm overflow-x-auto" id="salida">
-              La trama aparecerá aquí...
-            </div>
+          <div class="bg-gray-800 text-green-400 p-4 rounded-md font-mono text-sm overflow-x-auto" id="salida">
+            La trama aparecerá aquí...
           </div>
         </div>
       </div>
 
-      <!-- Legend Section -->
-      <div class="lg:w-1/3">
-        <div class="bg-white rounded-lg shadow-lg p-4">
-          <div class="flex items-center mb-4">
-            <i class="fas fa-info-circle text-blue-600 text-xl mr-2"></i>
-            <h2 class="text-lg font-semibold text-gray-800">Leyenda de Referencia</h2>
-          </div>
-          
-          <div class="text-sm text-gray-600 mb-4">
-            Referencia de valores Bank y File disponibles:
-          </div>
-          
-          <div class="space-y-2 max-h-[calc(100vh-200px)] overflow-y-auto pr-2">
-            <!-- Bank 00 -->
-            <details class="legend-item bg-gray-50 rounded-md">
-              <summary class="p-2 cursor-pointer font-medium hover:bg-blue-50 transition-colors rounded-md">
-                Bank 00 - Undefined
-              </summary>
-              <div class="p-3 pl-4 border-l-2 border-blue-200">
-                <p>Undefined</p>
-              </div>
-            </details>
-            
-            <!-- Bank 01 -->
-            <details class="legend-item bg-gray-50 rounded-md">
-              <summary class="p-2 cursor-pointer font-medium hover:bg-blue-50 transition-colors rounded-md">
-                Bank 01 - Undefined
-              </summary>
-              <div class="p-3 pl-4 border-l-2 border-blue-200">
-                <p>Undefined</p>
-              </div>
-            </details>
-            
-            <!-- Bank 02 -->
-            <details class="legend-item bg-gray-50 rounded-md">
-              <summary class="p-2 cursor-pointer font-medium hover:bg-blue-50 transition-colors rounded-md">
-                Bank 02 - Respuestas Positivas Mujer
-              </summary>
-              <div class="p-3 pl-4 border-l-2 border-blue-200">
-                <ul class="space-y-1">
-                  <li><span class="font-medium">File 11:</span> Muy bien</li>
-                  <li><span class="font-medium">File 12:</span> Buen trabajo</li>
-                  <li><span class="font-medium">File 13:</span> Correcto</li>
-                  <li><span class="font-medium">File 14:</span> Si</li>
-                </ul>
-              </div>
-            </details>
-            
-            <!-- Bank 03 -->
-            <details class="legend-item bg-gray-50 rounded-md">
-              <summary class="p-2 cursor-pointer font-medium hover:bg-blue-50 transition-colors rounded-md">
-                Bank 03 - Respuestas Positivas Hombre
-              </summary>
-              <div class="p-3 pl-4 border-l-2 border-blue-200">
-                <ul class="space-y-1">
-                  <li><span class="font-medium">File 11:</span> Muy bien</li>
-                  <li><span class="font-medium">File 12:</span> Buen trabajo</li>
-                  <li><span class="font-medium">File 13:</span> Correcto</li>
-                  <li><span class="font-medium">File 14:</span> Si</li>
-                </ul>
-              </div>
-            </details>
-            
-            <!-- Bank 04 -->
-            <details class="legend-item bg-gray-50 rounded-md">
-              <summary class="p-2 cursor-pointer font-medium hover:bg-blue-50 transition-colors rounded-md">
-                Bank 04 - Respuestas negativas Mujer
-              </summary>
-              <div class="p-3 pl-4 border-l-2 border-blue-200">
-                <ul class="space-y-1">
-                  <li><span class="font-medium">File 11:</span> Prueba otra vez</li>
-                  <li><span class="font-medium">File 12:</span> Inténtalo de nuevo</li>
-                  <li><span class="font-medium">File 13:</span> No es correcto</li>
-                  <li><span class="font-medium">File 14:</span> No</li>
-                </ul>
-              </div>
-            </details>
-            
-            <!-- Bank 05 -->
-            <details class="legend-item bg-gray-50 rounded-md">
-              <summary class="p-2 cursor-pointer font-medium hover:bg-blue-50 transition-colors rounded-md">
-                Bank 05 - Respuestas negativas Hombre
-              </summary>
-              <div class="p-3 pl-4 border-l-2 border-blue-200">
-                <ul class="space-y-1">
-                  <li><span class="font-medium">File 11:</span> Prueba otra vez</li>
-                  <li><span class="font-medium">File 12:</span> Inténtalo de nuevo</li>
-                  <li><span class="font-medium">File 13:</span> No es correcto</li>
-                  <li><span class="font-medium">File 14:</span> No</li>
-                </ul>
-              </div>
-            </details>
-            
-            <!-- Bank 11 -->
-            <details class="legend-item bg-gray-50 rounded-md">
-              <summary class="p-2 cursor-pointer font-medium hover:bg-blue-50 transition-colors rounded-md">
-                Bank 11 - Animales de granja
-              </summary>
-              <div class="p-3 pl-4 border-l-2 border-blue-200">
-                <ul class="space-y-1">
-                  <li><span class="font-medium">File 1:</span> Perro</li>
-                  <li><span class="font-medium">File 2:</span> Gato</li>
-                  <li><span class="font-medium">File 3:</span> Vaca</li>
-                  <li><span class="font-medium">File 4:</span> Oveja</li>
-                  <li><span class="font-medium">File 5:</span> Caballo</li>
-                  <li><span class="font-medium">File 6:</span> Gallina</li>
-                  <li><span class="font-medium">File 7:</span> Cerdo</li>
-                  <li><span class="font-medium">File 8:</span> Pato</li>
-                </ul>
-              </div>
-            </details>
-            
-            <!-- Bank 14 -->
-            <details class="legend-item bg-gray-50 rounded-md">
-              <summary class="p-2 cursor-pointer font-medium hover:bg-blue-50 transition-colors rounded-md">
-                Bank 14 - Colores
-              </summary>
-              <div class="p-3 pl-4 border-l-2 border-blue-200">
-                <ul class="space-y-1">
-                  <li><span class="font-medium">File 11:</span> Blanco</li>
-                  <li><span class="font-medium">File 12:</span> Amarillo</li>
-                  <li><span class="font-medium">File 13:</span> Naranja</li>
-                  <li><span class="font-medium">File 14:</span> Rojo</li>
-                  <li><span class="font-medium">File 15:</span> Rosa</li>
-                  <li><span class="font-medium">File 16:</span> Azul</li>
-                  <li><span class="font-medium">File 17:</span> Celeste</li>
-                  <li><span class="font-medium">File 18:</span> Verde</li>
-                  <li><span class="font-medium">File 19:</span> Negro</li>
-                </ul>
-              </div>
-            </details>
-          </div>
-          
-          <!-- Quick Reference Button -->
-          <div class="mt-4">
-            <button id="quickFillButton" class="w-full px-4 py-2 bg-blue-100 text-blue-700 font-medium rounded-md hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-300 transition-colors">
-              <i class="fas fa-bolt mr-1"></i>Rellenar valores rápidamente
-            </button>
-          </div>
+      <!-- Base de datos temporal de fichas -->
+      <div class="mt-8 bg-white rounded-lg shadow-lg p-6">
+        <h2 class="text-lg font-semibold mb-4 text-gray-700">Fichas Generadas</h2>
+        <table class="min-w-full divide-y divide-gray-200" id="tablaFichas">
+          <thead>
+            <tr>
+              <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Nombre</th>
+              <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">CMD</th>
+              <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">CM2</th>
+              <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Bank/File</th>
+              <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Color</th>
+              <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200" id="tbodyFichas">
+            <!-- Filas generadas dinámicamente -->
+          </tbody>
+        </table>
+        <!-- Exportar/Importar datos (leyenda y fichas) -->
+        <div class="mt-4 flex space-x-4">
+          <button onclick="exportData()" class="px-4 py-2 bg-green-600 text-white rounded">Exportar datos</button>
+          <button onclick="document.getElementById('importData').click()" class="px-4 py-2 bg-yellow-600 text-white rounded">Importar datos</button>
+          <input type="file" id="importData" accept=".json" style="display: none;" onchange="importData(event)">
         </div>
+      </div>
+    </div>
+
+    <!-- Sidebar: Leyenda de referencia -->
+    <div class="w-1/4 bg-gray-200 p-4">
+      <h2 class="text-xl font-bold mb-4 text-gray-800">Leyenda de referencia</h2>
+      <div id="sidebarLeyenda">
+        <!-- Se generará dinámicamente -->
       </div>
     </div>
   </div>
 
   <script>
-    // Generate partner inputs
+    // Variables globales
+    let fichasDB = [];
+    let leyendaFichas = {
+      "Gato": { 
+        bank: "0B", 
+        file: "02", 
+        bankNombre: "ANIMALES GRANJA", 
+        fileNombre: "Gato", 
+        familia: "ANIMALES GRANJA",
+        cmd: "0", 
+        cm2: "0", 
+        color: "#FFFFFF" 
+      },
+      "Blanco": { 
+        bank: "0E", 
+        file: "11", 
+        bankNombre: "OTRA FAMILIA", 
+        fileNombre: "Blanco", 
+        familia: "OTRA FAMILIA",
+        cmd: "0", 
+        cm2: "0", 
+        color: "#FFFFFF" 
+      }
+    };
+
+    // Función para actualizar el sidebar de la leyenda
+    function actualizarSidebarLeyenda() {
+      const sidebar = document.getElementById('sidebarLeyenda');
+      sidebar.innerHTML = "";
+      for (const key in leyendaFichas) {
+        const item = leyendaFichas[key];
+        const contItem = document.createElement('div');
+        contItem.className = "flex items-center justify-between bg-white p-2 mb-2 rounded shadow";
+        const info = document.createElement('div');
+        info.className = "cursor-pointer";
+        info.title = `CMD: ${item.cmd} - CM2: ${item.cm2}\nBanco: ${item.bank} (${item.bankNombre}) - File: ${item.file} (${item.fileNombre})\nColor: ${item.color}`;
+        info.textContent = item.bankNombre + " / " + item.fileNombre;
+        // Al hacer click se cargan todos los parámetros principales, incluido el Nombre familia
+        info.onclick = () => insertarDesdeLeyenda(key);
+        contItem.appendChild(info);
+        // Botones de editar y eliminar
+        const acciones = document.createElement('div');
+        acciones.className = "text-sm";
+        const btnEditar = document.createElement('button');
+        btnEditar.className = "text-blue-600 mr-2";
+        btnEditar.innerHTML = '<i class="fas fa-edit"></i>';
+        btnEditar.onclick = () => editarElementoLeyenda(key);
+        acciones.appendChild(btnEditar);
+        const btnEliminar = document.createElement('button');
+        btnEliminar.className = "text-red-600";
+        btnEliminar.innerHTML = '<i class="fas fa-trash"></i>';
+        btnEliminar.onclick = () => eliminarElementoLeyenda(key);
+        acciones.appendChild(btnEliminar);
+        contItem.appendChild(acciones);
+        sidebar.appendChild(contItem);
+      }
+      actualizarSelectPartners();
+    }
+
+    // Función para agregar un nuevo elemento a la leyenda
+    function agregarALeyenda() {
+      const bankValue = document.getElementById('bank').value;
+      const fileValue = document.getElementById('file').value;
+      const familiaValue = document.getElementById('familia').value;
+      // Se usa como valor por defecto el contenido de "Nombre familia" para el banco
+      let bankNombre = prompt("Introduce el nombre para el banco (" + bankValue + "):", familiaValue);
+      if(bankNombre === null) return;
+      let fileNombre = prompt("Introduce el nombre para el file (" + fileValue + "):", "");
+      if(fileNombre === null) return;
+      // Se almacena también CMD, CM2, Color y el Nombre familia
+      leyendaFichas[fileNombre] = { 
+        bank: bankValue, 
+        file: fileValue, 
+        bankNombre, 
+        fileNombre, 
+        familia: familiaValue,
+        cmd: document.getElementById('cmd').value,
+        cm2: document.getElementById('cm2').value,
+        color: document.getElementById('colorPicker').value
+      };
+      actualizarSidebarLeyenda();
+      showAlert("Nuevo elemento añadido a la leyenda.");
+    }
+
+    // Función para editar un elemento de la leyenda
+    function editarElementoLeyenda(key) {
+      const item = leyendaFichas[key];
+      let nuevoBank = prompt("Editar BANK:", item.bank);
+      if(nuevoBank === null) return;
+      nuevoBank = nuevoBank.replace(/[^0-9A-Fa-f]/g, '').toUpperCase();
+      let nuevoFile = prompt("Editar FILE:", item.file);
+      if(nuevoFile === null) return;
+      nuevoFile = nuevoFile.replace(/[^0-9A-Fa-f]/g, '').toUpperCase();
+      let nuevoBankNombre = prompt("Editar nombre del banco:", item.bankNombre);
+      if(nuevoBankNombre === null) return;
+      let nuevoFileNombre = prompt("Editar nombre del file:", item.fileNombre);
+      if(nuevoFileNombre === null) return;
+      let nuevoCmd = prompt("Editar CMD (0: Con efecto, 1: Sin efecto):", item.cmd);
+      if(nuevoCmd === null) return;
+      let nuevoCm2 = prompt("Editar CM2 (0: Color temporal, 1: Color permanente):", item.cm2);
+      if(nuevoCm2 === null) return;
+      let nuevoColor = prompt("Editar Color (en formato #RRGGBB):", item.color);
+      if(nuevoColor === null) return;
+      let nuevaFamilia = prompt("Editar Nombre familia:", item.familia || "");
+      if(nuevaFamilia === null) return;
+      delete leyendaFichas[key];
+      leyendaFichas[nuevoFileNombre] = { 
+        bank: nuevoBank, 
+        file: nuevoFile, 
+        bankNombre: nuevoBankNombre, 
+        fileNombre: nuevoFileNombre, 
+        familia: nuevaFamilia,
+        cmd: nuevoCmd, 
+        cm2: nuevoCm2, 
+        color: nuevoColor 
+      };
+      actualizarSidebarLeyenda();
+      showAlert("Elemento de leyenda actualizado.");
+    }
+
+    // Función para eliminar un elemento de la leyenda
+    function eliminarElementoLeyenda(key) {
+      if(confirm("¿Está seguro de eliminar este elemento de la leyenda?")){
+        delete leyendaFichas[key];
+        actualizarSidebarLeyenda();
+        showAlert("Elemento eliminado de la leyenda.");
+      }
+    }
+
+    // Actualizar los select de partners en función de la leyenda
+    function actualizarSelectPartners() {
+      const selects = document.getElementsByClassName('partner-select');
+      for(let select of selects) {
+        select.innerHTML = '<option value="">Seleccionar ficha</option>';
+        for(const key in leyendaFichas) {
+          const item = leyendaFichas[key];
+          const option = document.createElement('option');
+          option.value = item.bank + item.file;
+          option.textContent = item.fileNombre;
+          option.title = "Banco: " + item.bank + " - File: " + item.file;
+          select.appendChild(option);
+        }
+      }
+    }
+
+    // Generar inputs de partners con select y botón de copia rápida
     const partnerContainer = document.getElementById("partners");
     for (let i = 0; i < 8; i++) {
       partnerContainer.innerHTML += `
-        <div class="partner-input mb-3">
+        <div class="partner-input mb-3 border p-2 rounded">
           <label class="block text-sm font-medium text-gray-700 mb-1">Partner ${i}:</label>
-          <div class="flex space-x-2">
+          <div class="flex space-x-2 items-center">
             <div>
               <span class="text-xs text-gray-500">Bank</span>
-              <input type="text" id="b${i}" value="00" class="hex-input px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" maxlength="2" onkeyup="validateHex(this)">
+              <input type="text" id="b${i}" value="00" class="hex-input px-2 py-1 border border-gray-300 rounded" maxlength="2" onkeyup="validateHex(this)">
             </div>
             <div>
               <span class="text-xs text-gray-500">File</span>
-              <input type="text" id="f${i}" value="00" class="hex-input px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" maxlength="2" onkeyup="validateHex(this)">
+              <input type="text" id="f${i}" value="00" class="hex-input px-2 py-1 border border-gray-300 rounded" maxlength="2" onkeyup="validateHex(this)">
+            </div>
+            <div>
+              <select onchange="asociarComoPartner(this.value, ${i})" class="partner-select px-2 py-1 border border-gray-300 rounded">
+                <option value="">Seleccionar ficha</option>
+              </select>
+            </div>
+            <div>
+              <button type="button" onclick="copiarPartnerDesdeActual(${i})" class="px-2 py-1 border border-gray-300 rounded text-xs">Copiar actual</button>
             </div>
           </div>
         </div>
       `;
     }
 
-    // Update character count for family name
+    // Inicializar sidebar de leyenda
+    actualizarSidebarLeyenda();
+
+    // Actualizar contador de caracteres para "familia"
     document.getElementById('familia').addEventListener('input', function() {
       const remaining = 24 - this.value.length;
       document.getElementById('charCount').textContent = remaining;
     });
-    
-    // Trigger initial character count
     document.getElementById('familia').dispatchEvent(new Event('input'));
 
-    // Validate hex input
+    // Validación de entradas hexadecimales
     function validateHex(input) {
       input.value = input.value.replace(/[^0-9A-Fa-f]/g, '').toUpperCase();
     }
 
-    // Update color picker from RGB inputs
+    // Actualizar el selector de color a partir de los valores RGB
     function updateColorPicker() {
       const r = document.getElementById('r').value.padStart(2, '0');
       const g = document.getElementById('g').value.padStart(2, '0');
       const b = document.getElementById('b').value.padStart(2, '0');
-      
       if (r.length === 2 && g.length === 2 && b.length === 2) {
         const hexColor = `#${r}${g}${b}`;
         document.getElementById('colorPicker').value = hexColor;
@@ -330,81 +398,53 @@
       }
     }
 
-    // Update RGB inputs from color picker
+    // Actualizar los valores RGB desde el color picker
     function updateRGBFromPicker() {
       const hexColor = document.getElementById('colorPicker').value;
       const r = hexColor.substring(1, 3);
       const g = hexColor.substring(3, 5);
       const b = hexColor.substring(5, 7);
-      
       document.getElementById('r').value = r.toUpperCase();
       document.getElementById('g').value = g.toUpperCase();
       document.getElementById('b').value = b.toUpperCase();
-      
       document.getElementById('colorPreview').style.backgroundColor = hexColor;
     }
-
-    // Initialize color preview
     updateColorPicker();
 
-    // Copy to clipboard function
-    function copyToClipboard() {
-      const text = document.getElementById('salida').innerText;
-      navigator.clipboard.writeText(text).then(() => {
-        const copyButton = document.getElementById('copyButton');
-        copyButton.innerHTML = '<i class="fas fa-check mr-1"></i>Copiado';
-        copyButton.classList.remove('bg-gray-200', 'text-gray-700');
-        copyButton.classList.add('bg-green-500', 'text-white');
-        
-        setTimeout(() => {
-          copyButton.innerHTML = '<i class="far fa-copy mr-1"></i>Copiar';
-          copyButton.classList.remove('bg-green-500', 'text-white');
-          copyButton.classList.add('bg-gray-200', 'text-gray-700');
-        }, 2000);
-      });
+    // Función para cargar los parámetros desde la leyenda (incluye Nombre familia)
+    function insertarDesdeLeyenda(clave) {
+      if(leyendaFichas[clave]){
+        const item = leyendaFichas[clave];
+        document.getElementById('cmd').value = item.cmd;
+        document.getElementById('cm2').value = item.cm2;
+        document.getElementById('bank').value = item.bank;
+        document.getElementById('file').value = item.file;
+        document.getElementById('colorPicker').value = item.color;
+        updateRGBFromPicker();
+        document.getElementById('familia').value = item.familia || "";
+      } else {
+        showAlert("Elemento no encontrado en la leyenda");
+      }
     }
 
-    // Quick Fill Button
-    document.getElementById('quickFillButton').addEventListener('click', function() {
-      // Show a simple modal with common configurations
-      const bankOptions = [
-        { value: '02', label: 'Respuestas Positivas Mujer' },
-        { value: '03', label: 'Respuestas Positivas Hombre' },
-        { value: '04', label: 'Respuestas Negativas Mujer' },
-        { value: '05', label: 'Respuestas Negativas Hombre' },
-        { value: '0B', label: 'Animales de granja' },
-        { value: '0E', label: 'Colores' }
-      ];
-      
-      let selectedBank = prompt('Seleccione un Bank para rellenar rápidamente:\n' + 
-        bankOptions.map((opt, i) => `${i+1}. Bank ${opt.value} - ${opt.label}`).join('\n') +
-        '\n\nIngrese el número de opción:');
-      
-      if (selectedBank && !isNaN(selectedBank) && selectedBank > 0 && selectedBank <= bankOptions.length) {
-        const bankOption = bankOptions[parseInt(selectedBank) - 1];
-        document.getElementById('bank').value = bankOption.value;
-        
-        // Set a default file value based on the bank
-        let fileValue = '01';
-        if (['02', '03', '04', '05'].includes(bankOption.value)) {
-          fileValue = '0B';
-        }
-        document.getElementById('file').value = fileValue;
-        
-        // Set family name based on selection
-        if (bankOption.value === '0B') {
-          document.getElementById('familia').value = 'ANIMALES GRANJA';
-        } else if (bankOption.value === '0E') {
-          document.getElementById('familia').value = 'COLORES';
-        }
-        
-        // Update character count
-        document.getElementById('familia').dispatchEvent(new Event('input'));
-        
-        alert(`Se ha configurado Bank ${bankOption.value} - ${bankOption.label}`);
+    // Funciones para partners
+    function asociarComoPartner(value, index) {
+      if(value){
+        const bank = value.substring(0,2);
+        const file = value.substring(2,4);
+        document.getElementById('b' + index).value = bank;
+        document.getElementById('f' + index).value = file;
       }
-    });
+    }
 
+    function copiarPartnerDesdeActual(index) {
+      const bankVal = document.getElementById('bank').value;
+      const fileVal = document.getElementById('file').value;
+      document.getElementById('b' + index).value = bankVal;
+      document.getElementById('f' + index).value = fileVal;
+    }
+
+    // Funciones auxiliares para formatear hexadecimal
     function padHex(value, length = 2) {
       return value.toString().padStart(length, '0').toUpperCase();
     }
@@ -421,6 +461,16 @@
       return hex;
     }
 
+    function hexToText(hex) {
+      let texto = "";
+      for (let i = 0; i < hex.length; i += 2) {
+        let byte = parseInt(hex.substr(i, 2), 16);
+        if (byte > 0) texto += String.fromCharCode(byte);
+      }
+      return texto;
+    }
+
+    // Función para generar la trama
     function generarTrama() {
       let trama = "#";
       const campos = ["cmd", "cm2", "bank", "file", "r", "g", "b"];
@@ -428,18 +478,251 @@
         let valor = document.getElementById(id).value.trim();
         trama += padHex(valor);
       });
-
       for (let i = 0; i < 8; i++) {
         let b = document.getElementById("b" + i).value.trim();
         let f = document.getElementById("f" + i).value.trim();
         trama += padHex(b) + padHex(f);
       }
-
       let nombreFamilia = document.getElementById("familia").value.trim().toUpperCase();
       trama += textToHex(nombreFamilia, 24);
       trama += "#";
-
       document.getElementById("salida").innerText = trama;
+      document.getElementById("tramaInput").value = trama;
+      console.log("Trama generada:", trama);
+      console.log("Longitud total:", trama.length);
+      console.log("Longitud sin #:", trama.slice(1, -1).length);
+      actualizarSimulador();
+    }
+
+    // Función para decodificar la trama
+    function decodificarTrama() {
+      let input = document.getElementById("tramaInput").value.trim();
+      input = input.replace(/\s+/g, '');
+      console.log("Trama original:", input);
+      console.log("Longitud con #:", input.length);
+      const originalInput = input;
+      if (input.startsWith("#")) input = input.substring(1);
+      if (input.endsWith("#")) input = input.slice(0, -1);
+      console.log("Trama sin #:", input);
+      console.log("Longitud sin #:", input.length);
+      if (!originalInput.startsWith("#") || !originalInput.endsWith("#")) {
+        showAlert("La trama debe comenzar y terminar con el símbolo #");
+        return;
+      }
+      if (input.length !== 94) {
+        showAlert(`La trama debe tener exactamente 94 caracteres sin los símbolos #. Longitud actual: ${input.length}`);
+        return;
+      }
+      try {
+        document.getElementById("cmd").value = input.slice(0, 2);
+        document.getElementById("cm2").value = input.slice(2, 4);
+        document.getElementById("bank").value = input.slice(4, 6);
+        document.getElementById("file").value = input.slice(6, 8);
+        document.getElementById("r").value = input.slice(8, 10);
+        document.getElementById("g").value = input.slice(10, 12);
+        document.getElementById("b").value = input.slice(12, 14);
+        updateColorPicker();
+        for (let i = 0; i < 8; i++) {
+          document.getElementById("b" + i).value = input.slice(14 + i * 4, 16 + i * 4);
+          document.getElementById("f" + i).value = input.slice(16 + i * 4, 18 + i * 4);
+        }
+        let hexNombre = input.slice(46, 94);
+        document.getElementById("familia").value = hexToText(hexNombre);
+        document.getElementById('familia').dispatchEvent(new Event('input'));
+        document.getElementById("salida").innerHTML = `
+          <span class="text-yellow-400">✓</span> Trama decodificada correctamente.
+          <div class="mt-2 text-xs text-gray-400">Todos los campos han sido actualizados con los valores de la trama.</div>
+        `;
+      } catch (error) {
+        showAlert(`Error al decodificar la trama: ${error.message}`);
+        console.error("Error decodificando trama:", error);
+      }
+    }
+
+    // Función para copiar al portapapeles
+    function copyToClipboard() {
+      const text = document.getElementById('salida').innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        const copyButton = document.getElementById('copyButton');
+        copyButton.innerHTML = '<i class="fas fa-check mr-1"></i>Copiado';
+        copyButton.classList.remove('bg-gray-200', 'text-gray-700');
+        copyButton.classList.add('bg-green-500', 'text-white');
+        setTimeout(() => {
+          copyButton.innerHTML = '<i class="far fa-copy mr-1"></i>Copiar';
+          copyButton.classList.remove('bg-green-500', 'text-white');
+          copyButton.classList.add('bg-gray-200', 'text-gray-700');
+        }, 2000);
+      });
+    }
+
+    // Funciones para la base de datos temporal de fichas
+    function guardarFicha() {
+      const ficha = {
+        cmd: document.getElementById('cmd').value,
+        cm2: document.getElementById('cm2').value,
+        bank: document.getElementById('bank').value,
+        file: document.getElementById('file').value,
+        color: document.getElementById('colorPicker').value,
+        r: document.getElementById('r').value,
+        g: document.getElementById('g').value,
+        b: document.getElementById('b').value,
+        familia: document.getElementById('familia').value,
+        partners: []
+      };
+      for(let i = 0; i < 8; i++){
+        ficha.partners.push({
+          bank: document.getElementById('b' + i).value,
+          file: document.getElementById('f' + i).value
+        });
+      }
+      fichasDB.push(ficha);
+      actualizarTablaFichas();
+      showAlert("Ficha guardada en la base de datos temporal.");
+    }
+
+    function actualizarTablaFichas() {
+      const tbody = document.getElementById('tbodyFichas');
+      tbody.innerHTML = "";
+      fichasDB.forEach((ficha, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td class="px-4 py-2">${ficha.familia}</td>
+          <td class="px-4 py-2">${ficha.cmd}</td>
+          <td class="px-4 py-2">${ficha.cm2}</td>
+          <td class="px-4 py-2">${ficha.bank}/${ficha.file}</td>
+          <td class="px-4 py-2" style="background-color:${ficha.color};"> ${ficha.color}</td>
+          <td class="px-4 py-2">
+            <button onclick="editarFicha(${index})" class="text-blue-600 text-sm">Editar</button>
+            <button onclick="eliminarFicha(${index})" class="text-red-600 text-sm ml-2">Eliminar</button>
+            <button onclick="usarFichaComoPartner(${index})" class="text-green-600 text-sm ml-2">Usar como partner</button>
+            <button onclick="cargarFicha(${index})" class="text-indigo-600 text-sm ml-2">Cargar ficha</button>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    function editarFicha(index) {
+      const ficha = fichasDB[index];
+      document.getElementById('cmd').value = ficha.cmd;
+      document.getElementById('cm2').value = ficha.cm2;
+      document.getElementById('bank').value = ficha.bank;
+      document.getElementById('file').value = ficha.file;
+      document.getElementById('colorPicker').value = ficha.color;
+      updateRGBFromPicker();
+      document.getElementById('familia').value = ficha.familia;
+      ficha.partners.forEach((p, i) => {
+        document.getElementById('b' + i).value = p.bank;
+        document.getElementById('f' + i).value = p.file;
+      });
+      showAlert("Ficha cargada para edición.");
+    }
+
+    // Función para cargar ficha (cargar parámetros desde ficha almacenada)
+    function cargarFicha(index) {
+      const ficha = fichasDB[index];
+      document.getElementById('cmd').value = ficha.cmd;
+      document.getElementById('cm2').value = ficha.cm2;
+      document.getElementById('bank').value = ficha.bank;
+      document.getElementById('file').value = ficha.file;
+      document.getElementById('colorPicker').value = ficha.color;
+      updateRGBFromPicker();
+      document.getElementById('familia').value = ficha.familia;
+      ficha.partners.forEach((p, i) => {
+        document.getElementById('b' + i).value = p.bank;
+        document.getElementById('f' + i).value = p.file;
+      });
+      showAlert("Ficha cargada.");
+    }
+
+    function eliminarFicha(index) {
+      if(confirm("¿Está seguro de eliminar esta ficha?")){
+        fichasDB.splice(index, 1);
+        actualizarTablaFichas();
+        showAlert("Ficha eliminada.");
+      }
+    }
+
+    // Al usar una ficha como partner se pide el número de partner (0-7)
+    function usarFichaComoPartner(index) {
+      const ficha = fichasDB[index];
+      let partnerNum = prompt("Introduce el número del partner (0-7):", "0");
+      partnerNum = parseInt(partnerNum);
+      if(isNaN(partnerNum) || partnerNum < 0 || partnerNum > 7){
+        showAlert("Número de partner no válido.");
+        return;
+      }
+      document.getElementById('b' + partnerNum).value = ficha.bank;
+      document.getElementById('f' + partnerNum).value = ficha.file;
+      showAlert(`Ficha usada como partner en la posición ${partnerNum}`);
+    }
+
+    // Funciones para exportar e importar datos (leyenda y fichas generadas)
+    function exportData() {
+      const exportObj = { leyendaFichas: leyendaFichas, fichasDB: fichasDB };
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj));
+      const a = document.createElement('a');
+      a.href = dataStr;
+      a.download = "data.json";
+      a.click();
+    }
+
+    function importData(event) {
+      const file = event.target.files[0];
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if(typeof imported === "object" && imported !== null){
+            leyendaFichas = imported.leyendaFichas || {};
+            fichasDB = imported.fichasDB || [];
+            actualizarSidebarLeyenda();
+            actualizarTablaFichas();
+            showAlert("Datos importados correctamente.");
+          } else {
+            showAlert("Formato de archivo incorrecto.");
+          }
+        } catch (error) {
+          showAlert("Error al importar los datos.");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    // Simulador de Trama: mostrar desglose interpretativo
+    function actualizarSimulador() {
+      let simuladorHTML = `<ul class="list-disc pl-5">`;
+      let cmd = document.getElementById('cmd').value;
+      let cm2 = document.getElementById('cm2').value;
+      let descripcionCMD = (cmd === "0") ? "Con efecto de sonido" : "Sin efecto de sonido";
+      let descripcionCM2 = (cm2 === "0") ? "Color temporal" : "Color permanente";
+      simuladorHTML += `<li><strong>CMD:</strong> ${cmd} - ${descripcionCMD}</li>`;
+      simuladorHTML += `<li><strong>CM2:</strong> ${cm2} - ${descripcionCM2}</li>`;
+      simuladorHTML += `<li><strong>BANK:</strong> ${document.getElementById('bank').value}</li>`;
+      simuladorHTML += `<li><strong>FILE:</strong> ${document.getElementById('file').value}</li>`;
+      let color = document.getElementById('colorPicker').value;
+      simuladorHTML += `<li><strong>Color:</strong> ${color}</li>`;
+      simuladorHTML += `<li><strong>Partners:</strong><ul>`;
+      for(let i=0; i<8; i++){
+        let pBank = document.getElementById('b' + i).value;
+        let pFile = document.getElementById('f' + i).value;
+        simuladorHTML += `<li>Partner ${i}: ${pBank}${pFile}</li>`;
+      }
+      simuladorHTML += `</ul></li>`;
+      simuladorHTML += `</ul>`;
+      document.getElementById('simuladorTrama').innerHTML = simuladorHTML;
+    }
+
+    // Función para mostrar alertas
+    function showAlert(message) {
+      const alertEl = document.createElement('div');
+      alertEl.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-md shadow-lg z-50 flex items-center';
+      alertEl.innerHTML = `<i class="fas fa-exclamation-triangle mr-2"></i><span>${message}</span>`;
+      document.body.appendChild(alertEl);
+      setTimeout(() => {
+        alertEl.classList.add('opacity-0', 'transition-opacity', 'duration-500');
+        setTimeout(() => alertEl.remove(), 500);
+      }, 5000);
     }
   </script>
 </body>
